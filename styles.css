@@ -168,6 +168,40 @@ body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
+.header-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pill-terminal {
+  border: 1px solid var(--border-fine);
+  background: var(--surface-subtle);
+  color: var(--green-forest);
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s var(--ease);
+}
+
+.pill-terminal:hover {
+  background: var(--surface-white);
+  border-color: var(--green-forest);
+  transform: translateY(-1px);
+}
+
+.terminal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pill-cta {
   border: none;
   background: var(--green-forest);
@@ -1354,6 +1388,280 @@ body {
   font-size: 0.72rem;
   color: var(--ink-faint);
   font-weight: 500;
+}
+
+/* ============================================================
+   12. INTERACTIVE GITHUB TERMINAL MODAL
+   ============================================================ */
+.terminal-modal-window {
+  background: #09120F;
+  border: 1px solid #1A2E26;
+  border-radius: var(--radius-2xl);
+  max-width: 820px;
+  width: 100%;
+  max-height: 88vh;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: #E2F1EC;
+  animation: modalScaleIn 0.25s var(--ease);
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.terminal-topbar {
+  background: #0E1A16;
+  border-bottom: 1px solid #1A2E26;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.terminal-window-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.term-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.term-dot.close { background: #FF5F56; }
+.term-dot.minimize { background: #FFBD2E; }
+.term-dot.zoom { background: #27C93F; }
+
+.terminal-window-title {
+  font-size: 0.72rem;
+  color: #7A998E;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.terminal-window-exit {
+  border: none;
+  background: transparent;
+  color: #7A998E;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.terminal-window-exit:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.terminal-body-scroll {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(88vh - 48px);
+}
+
+.terminal-banner {
+  margin-bottom: 24px;
+}
+
+.term-ascii {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 1.15;
+  color: var(--lime-electric);
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.term-intro {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  color: #A3C2B6;
+  line-height: 1.5;
+}
+
+.term-intro strong {
+  color: #FFFFFF;
+}
+
+.term-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.term-action-card {
+  background: #11211C;
+  border: 1px solid #1C362D;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.term-action-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.term-step-num {
+  background: var(--lime-electric);
+  color: var(--green-deep);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+.term-step-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.term-action-desc {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  color: #8CAFA1;
+  margin-bottom: 10px;
+}
+
+.term-action-desc code {
+  color: var(--lime-electric);
+  background: #09120F;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.term-link-btn {
+  display: inline-block;
+  background: rgba(212, 236, 88, 0.12);
+  color: var(--lime-electric);
+  border: 1px solid rgba(212, 236, 88, 0.3);
+  text-decoration: none;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  transition: all 0.2s var(--ease);
+}
+
+.term-link-btn:hover {
+  background: var(--lime-electric);
+  color: var(--green-deep);
+}
+
+.term-code-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #070E0B;
+  border: 1px solid #162C24;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.term-code-block code {
+  font-size: 0.74rem;
+  color: #5BC4A0;
+  word-break: break-all;
+}
+
+.term-copy-btn {
+  background: #162E25;
+  border: 1px solid #285444;
+  color: #E2F1EC;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.term-copy-btn:hover {
+  background: var(--lime-electric);
+  color: var(--green-deep);
+  border-color: var(--lime-electric);
+}
+
+/* Interactive Terminal Section */
+.term-interactive-wrap {
+  background: #070E0B;
+  border: 1px solid #162C24;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.term-interactive-header {
+  font-size: 0.65rem;
+  color: #638578;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.term-interactive-log {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.term-line {
+  color: #D4E8DF;
+}
+
+.term-prompt {
+  color: var(--lime-electric);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.term-success {
+  color: #40DF95;
+}
+
+.term-faint {
+  color: #6A8E80;
+}
+
+.term-input-row {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #142720;
+  padding-top: 8px;
+}
+
+.term-input-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.term-input-row input::placeholder {
+  color: #436357;
 }
 
 /* ============================================================

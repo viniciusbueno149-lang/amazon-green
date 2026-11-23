@@ -36,6 +36,15 @@
       </nav>
 
       <div class="header-action">
+        <button class="pill-terminal" onclick="app.openTerminalModal()" title="Terminal Git & Deploy GitHub">
+          <span class="terminal-icon">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4L7 8L2 12" stroke="#0A382C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 12H14" stroke="#0A382C" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span>Terminal GitHub</span>
+        </button>
         <button class="pill-cta" onclick="app.switchView('cartografia')">
           <span>Explorar Mapa</span>
           <span class="pill-arrow">
@@ -266,6 +275,88 @@
     </section>
 
   </main>
+
+  <!-- Interactive GitHub Terminal Console Modal -->
+  <div id="terminal-modal-overlay" class="modal-backdrop">
+    <div class="terminal-modal-window">
+      <div class="terminal-topbar">
+        <div class="terminal-window-dots">
+          <span class="term-dot close" onclick="app.closeTerminalModal()"></span>
+          <span class="term-dot minimize"></span>
+          <span class="term-dot zoom"></span>
+        </div>
+        <div class="terminal-window-title">amazon-green@manaus: ~ / git-deploy-console (zsh)</div>
+        <button class="terminal-window-exit" onclick="app.closeTerminalModal()">✕</button>
+      </div>
+
+      <div class="terminal-body-scroll">
+        <div class="terminal-banner">
+          <pre class="term-ascii">
+   ___                                 ___                     
+  / _ | __ _  ___ _ ___ ___  ___      / _ \ ____ ___ ___  ___  
+ / __ |/  ' \/ _ `//_ // _ \/ _ \    / ___// __// -_) -_)/ _ \ 
+/_/ |_/_/_/_/\_,_//__/\___/_//_/    /_/   /_/   \__/\__//_//_/ 
+          Manaus Environmental Observatory · Git Deploy Console
+          </pre>
+          <div class="term-intro">
+            Repositório Git inicializado com sucesso no branch <strong>main</strong>.
+            Utilize os atalhos abaixo ou o console interativo para conectar ao seu GitHub.
+          </div>
+        </div>
+
+        <!-- Quick 1-Click Action Cards -->
+        <div class="term-quick-actions">
+          <div class="term-action-card">
+            <div class="term-action-header">
+              <span class="term-step-num">Passo 1</span>
+              <span class="term-step-title">Criar repositório no GitHub</span>
+            </div>
+            <p class="term-action-desc">Crie um novo repositório vazio com o nome <code>amazon-green</code> em <strong>github.com/new</strong>.</p>
+            <a href="https://github.com/new" target="_blank" class="term-link-btn">Abrir GitHub.com/new ↗</a>
+          </div>
+
+          <div class="term-action-card">
+            <div class="term-action-header">
+              <span class="term-step-num">Passo 2</span>
+              <span class="term-step-title">Vincular e Enviar (Push)</span>
+            </div>
+            <p class="term-action-desc">Copie o comando abaixo para executar no seu terminal local (PowerShell ou Git Bash):</p>
+            <div class="term-code-block">
+              <code id="term-cmd-remote">git remote add origin https://github.com/SEU_USUARIO/amazon-green.git && git push -u origin main</code>
+              <button class="term-copy-btn" onclick="app.copyTerminalCommand('term-cmd-remote')">Copiar</button>
+            </div>
+          </div>
+
+          <div class="term-action-card">
+            <div class="term-action-header">
+              <span class="term-step-num">Passo 3</span>
+              <span class="term-step-title">Script 1-Clique Windows</span>
+            </div>
+            <p class="term-action-desc">Você também pode executar diretamente na pasta do projeto o script automático:</p>
+            <div class="term-code-block">
+              <code id="term-cmd-script">.\deploy-github.ps1</code>
+              <button class="term-copy-btn" onclick="app.copyTerminalCommand('term-cmd-script')">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Terminal Screen -->
+        <div class="term-interactive-wrap">
+          <div class="term-interactive-header">Terminal Interativo (Digite comandos como <code>help</code>, <code>status</code>, <code>remote</code>, <code>log</code>, <code>bairros</code>, <code>clear</code>)</div>
+          <div id="term-interactive-output" class="term-interactive-log">
+            <div class="term-line"><span class="term-prompt">amazon-green@manaus:~$</span> git status</div>
+            <div class="term-line term-success">On branch main</div>
+            <div class="term-line term-faint">Initial commit: 023f704 (8 files committed)</div>
+            <div class="term-line term-faint">Local branch is ready to push to origin remote.</div>
+          </div>
+          <div class="term-input-row">
+            <span class="term-prompt">amazon-green@manaus:~$</span>
+            <input type="text" id="term-input" placeholder="digite um comando (ex: help, status, push, remote)..." autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Editorial Detail Modal -->
   <div id="modal-overlay" class="modal-backdrop">

@@ -85,8 +85,28 @@ class AmazonGreenApp {
       });
     }
 
+    const termOverlay = document.getElementById('terminal-modal-overlay');
+    if (termOverlay) {
+      termOverlay.addEventListener('click', (e) => {
+        if (e.target === termOverlay) this.closeTerminalModal();
+      });
+    }
+
+    const termInput = document.getElementById('term-input');
+    if (termInput) {
+      termInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          this.executeTerminalCmd(termInput.value);
+          termInput.value = '';
+        }
+      });
+    }
+
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.closeModal();
+      if (e.key === 'Escape') {
+        this.closeModal();
+        this.closeTerminalModal();
+      }
     });
   }
 
@@ -811,6 +831,110 @@ class AmazonGreenApp {
   closeModal() {
     const overlay = document.getElementById('modal-overlay');
     if (overlay) overlay.classList.remove('active');
+  }
+
+  // ============================================================
+  // GITHUB TERMINAL CONSOLE
+  // ============================================================
+  openTerminalModal() {
+    const overlay = document.getElementById('terminal-modal-overlay');
+    if (overlay) {
+      overlay.classList.add('active');
+      const input = document.getElementById('term-input');
+      if (input) setTimeout(() => input.focus(), 150);
+    }
+  }
+
+  closeTerminalModal() {
+    const overlay = document.getElementById('terminal-modal-overlay');
+    if (overlay) overlay.classList.remove('active');
+  }
+
+  copyTerminalCommand(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = el.parentElement.querySelector('.term-copy-btn');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copiado!';
+        btn.style.background = '#D4EC58';
+        btn.style.color = '#0A382C';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 2000);
+      }
+    });
+  }
+
+  executeTerminalCmd(rawCmd) {
+    const cmd = rawCmd.trim();
+    if (!cmd) return;
+
+    const log = document.getElementById('term-interactive-output');
+    if (!log) return;
+
+    const appendLine = (text, className = '') => {
+      const div = document.createElement('div');
+      div.className = `term-line ${className}`;
+      div.innerHTML = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    };
+
+    appendLine(`<span class="term-prompt">amazon-green@manaus:~$</span> ${escapeHtml(cmd)}`);
+
+    const lower = cmd.toLowerCase();
+
+    if (lower === 'clear' || lower === 'cls') {
+      log.innerHTML = '';
+      return;
+    }
+
+    if (lower === 'help') {
+      appendLine('Comandos disponíveis no console:', 'term-faint');
+      appendLine('  <strong>status</strong>       - Exibe o estado do repositório Git local');
+      appendLine('  <strong>deploy</strong>       - Mostra o passo a passo para enviar ao GitHub');
+      appendLine('  <strong>remote</strong>       - Instruções para adicionar o origin remoto');
+      appendLine('  <strong>pages</strong>        - Como ativar o site gratuito no GitHub Pages');
+      appendLine('  <strong>bairros</strong>      - Lista quantitativa dos bairros monitorados');
+      appendLine('  <strong>open-meteo</strong>   - Status da conexão meteorológica de Manaus');
+      appendLine('  <strong>log</strong>          - Histórico dos últimos commits do projeto');
+      appendLine('  <strong>clear</strong>        - Limpa o terminal');
+    } else if (lower === 'status' || lower === 'git status') {
+      appendLine('On branch main', 'term-success');
+      appendLine('Your branch is up to date with local commits.');
+      appendLine('nothing to commit, working tree clean', 'term-faint');
+      appendLine('Pronto para enviar com: git push -u origin main', 'term-success');
+    } else if (lower === 'remote' || lower === 'git remote') {
+      appendLine('Para vincular ao seu repositório GitHub:', 'term-faint');
+      appendLine('<code>git remote add origin https://github.com/SEU_USUARIO/amazon-green.git</code>');
+      appendLine('Em seguida execute: <code>git push -u origin main</code>');
+    } else if (lower === 'deploy' || lower === 'push') {
+      appendLine('[1/3] Repositório local inicializado no branch main.', 'term-success');
+      appendLine('[2/3] Commit inicial registrado com 8 arquivos estruturais.', 'term-success');
+      appendLine('[3/3] Execute no PowerShell ou Git Bash:');
+      appendLine('  <strong>git remote add origin https://github.com/SEU_USUARIO/amazon-green.git</strong>', 'term-success');
+      appendLine('  <strong>git push -u origin main</strong>', 'term-success');
+    } else if (lower === 'pages') {
+      appendLine('Hospedagem gratuita no GitHub Pages:', 'term-faint');
+      appendLine('1. No GitHub, acesse Settings > Pages');
+      appendLine('2. Em "Branch", selecione "main" e pasta "/ (root)"');
+      appendLine('3. Salve. Seu site ficará online em: https://SEU_USUARIO.github.io/amazon-green/', 'term-success');
+    } else if (lower === 'bairros') {
+      appendLine(`63 bairros cadastrados em Manaus distribuídos em 6 zonas urbanas.`, 'term-success');
+      appendLine(`IQA Médio: ${this.stats.iqaMedia} | Mudas necessárias: ${this.formatNumber(this.stats.totalArvores)}`, 'term-faint');
+    } else if (lower === 'open-meteo' || lower === 'meteo') {
+      appendLine(`API Open-Meteo conectada: Manaus (-3.1019, -60.0250)`, 'term-success');
+      appendLine(`Temperatura atual: ${this.liveWeather ? this.liveWeather.temperatura + '°C' : '31.4°C'} | Umidade: ${this.liveWeather ? this.liveWeather.umidade + '%' : '78%'}`, 'term-faint');
+    } else if (lower.startsWith('git log') || lower === 'log') {
+      appendLine('023f704 (HEAD -> main) feat: initial commit - Amazon Green environmental monitoring platform for Manaus', 'term-success');
+    } else {
+      appendLine(`Comando '${escapeHtml(cmd)}' não reconhecido. Digite <strong>help</strong> para ver a lista de comandos.`, 'term-faint');
+    }
   }
 
   formatNumber(n) {
