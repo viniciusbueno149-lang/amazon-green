@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Green — Vigilância Atmosférica & Silvicultura Urbana de Manaus</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230a382c'/><path d='M35 65 C35 45, 50 35, 65 35 C65 55, 50 65, 35 65 Z' fill='%23d4ec58'/></svg>">
+</head>
+<body>
+
+  <!-- Floating Capsule Navigation -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="brand-capsule" onclick="app.switchView('overview'); return false;">
+        <span class="brand-symbol">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 0L8.8 5.2L14 7L8.8 8.8L7 14L5.2 8.8L0 7L5.2 5.2L7 0Z" fill="#D4EC58"/>
+          </svg>
+        </span>
+        <span class="brand-name">Amazon Green</span>
+      </a>
+
+      <nav class="nav-segment">
+        <button class="nav-item active" data-view="overview" onclick="app.switchView('overview')">Visão Geral</button>
+        <button class="nav-item" data-view="cartografia" onclick="app.switchView('cartografia')">Cartografia</button>
+        <button class="nav-item" data-view="territorios" onclick="app.switchView('territorios')">Territórios</button>
+        <button class="nav-item" data-view="silvicultura" onclick="app.switchView('silvicultura')">Silvicultura</button>
+      </nav>
+
+      <div class="header-action">
+        <button class="pill-cta" onclick="app.switchView('cartografia')">
+          <span>Explorar Mapa</span>
+          <span class="pill-arrow">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M1 9L9 1M9 1H2M9 1V8" stroke="#0A382C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION: Dantora Pure Asymmetric Split -->
+  <section class="hero-block">
+    <div class="hero-text-col">
+      <div class="kicker">OBSERVATÓRIO URBANO · MANAUS</div>
+      <h1 class="hero-heading">A saúde do ar contada pelo fluxo da floresta.</h1>
+      <p class="hero-lead">
+        Diagnóstico contínuo dos 63 bairros de Manaus. Cruzamento de microclima equatorial, dispersão de material particulado e planos métricos de recomposição vegetal com espécies nativas da bacia amazônica.
+      </p>
+
+      <div class="trust-strip">
+        <span class="trust-metric">63 bairros catalogados</span>
+        <span class="trust-divider"></span>
+        <span id="live-weather-kicker">Estação meteorológica ativa</span>
+      </div>
+
+      <div class="hero-ctas">
+        <button class="btn-dark-pill" onclick="app.switchView('cartografia')">Mapeamento em Tempo Real</button>
+        <button class="btn-lime-pill" onclick="app.switchView('silvicultura')">Cálculo de Mudas</button>
+      </div>
+    </div>
+
+    <div class="hero-graphic-col">
+      <div class="fluid-canvas-frame">
+        <canvas id="ambient-canvas"></canvas>
+        
+        <!-- Dantora Clinical Specialty Chips (Floating translucent pills) -->
+        <div class="spec-chips">
+          <span class="chip">Qualidade do Ar</span>
+          <span class="chip">Sensação Térmica</span>
+          <span class="chip">Evapotranspiração</span>
+          <span class="chip">Densidade de Copa</span>
+          <span class="chip">Compensação Arbórea</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUB-BAR: LIVE METEOROLOGICAL TELEMETRY -->
+  <div class="telemetry-bar">
+    <div class="telemetry-inner">
+      <div class="telemetry-item">
+        <span class="tele-dot"></span>
+        <span class="tele-label">ESTAÇÃO MANAUS:</span>
+        <span class="tele-val" id="tele-source">Conectando...</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">SUPERFÍCIE (2M):</span>
+        <span class="tele-val" id="tele-temp">--°C</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">DOSSEL (80M):</span>
+        <span class="tele-val" id="tele-temp80">--°C</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">GRADIENTE VERTICAL:</span>
+        <span class="tele-val" id="tele-gradient">--°C</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">SENSAÇÃO TÉRMICA:</span>
+        <span class="tele-val" id="tele-feels">--°C</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">UMIDADE:</span>
+        <span class="tele-val" id="tele-humidity">--%</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="tele-label">VISIBILIDADE:</span>
+        <span class="tele-val" id="tele-vis">-- km</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN EDITORIAL CONTENT -->
+  <main class="content-wrapper">
+
+    <!-- VIEW: OVERVIEW -->
+    <section id="view-overview" class="view-panel active">
+      <div class="section-title-lockup">
+        <div class="section-kicker">METAS & BALANÇO AMBIENTAL</div>
+        <h2 class="display-title">Condição Atmosférica Metropolitana</h2>
+      </div>
+
+      <!-- Hero Metrics Strip -->
+      <div class="metrics-row" id="stats-grid"></div>
+
+      <!-- Split: Gauge & Atmospheric Distribution -->
+      <div class="bento-split">
+        <div class="bento-cell" id="gauge-container"></div>
+        <div class="bento-cell" id="distribution-container"></div>
+      </div>
+
+      <!-- 7-Day Meteorological Trend (Open-Meteo Hourly past_days=7) -->
+      <div class="section-title-lockup" style="margin-top: 4.5rem;">
+        <div class="section-kicker">SÉRIE TEMPORAL · OPEN-METEO HOURLY (ÚLTIMOS 7 DIAS)</div>
+        <div class="flex-between">
+          <div>
+            <h2 class="display-title">Dinâmica Microclimática & Dispersão</h2>
+            <p class="section-sub">Evolução horária de temperatura de superfície (2m), camada limite sobre a copa da floresta (80m), umidade e índice de visibilidade.</p>
+          </div>
+          <div class="segment-filter">
+            <button class="seg-btn active" id="chart-tab-temp" onclick="app.setChartMode('temp')">Temperatura (2m vs 80m)</button>
+            <button class="seg-btn" id="chart-tab-humid" onclick="app.setChartMode('humid')">Umidade Relativa (%)</button>
+            <button class="seg-btn" id="chart-tab-vis" onclick="app.setChartMode('vis')">Visibilidade (km)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeseries-card">
+        <div class="timeseries-header">
+          <div class="timeseries-metric-display">
+            <span class="ts-highlight" id="chart-highlight-val">--</span>
+            <span class="ts-highlight-sub" id="chart-highlight-lbl">Carregando telemetria horária...</span>
+          </div>
+          <div class="timeseries-meta" id="chart-meta-info">Série contínua de 168 horas passadas via Open-Meteo</div>
+        </div>
+        <div class="chart-canvas-container">
+          <canvas id="weather-timeseries-chart"></canvas>
+        </div>
+        <div class="chart-timeline-legend" id="chart-timeline-legend">
+          <span>7 dias atrás</span>
+          <span>5 dias atrás</span>
+          <span>3 dias atrás</span>
+          <span>Ontem</span>
+          <span style="color: var(--green-forest); font-weight: 700;">Hoje (Tempo Real)</span>
+        </div>
+      </div>
+
+      <!-- Zonal Architecture -->
+      <div class="section-title-lockup" style="margin-top: 4.5rem;">
+        <div class="section-kicker">SETORIZAÇÃO TERRITORIAL</div>
+        <h2 class="display-title">As Seis Zonas Urbanas de Manaus</h2>
+        <p class="section-sub">Diferenças térmicas e déficits de biomassa entre pólos industriais, bairros ribeirinhos e platôs residenciais.</p>
+      </div>
+      <div class="zones-masonry" id="zones-grid"></div>
+    </section>
+
+    <!-- VIEW: CARTOGRAFIA (MAPA) -->
+    <section id="view-cartografia" class="view-panel">
+      <div class="section-title-lockup">
+        <div class="section-kicker">ANÁLISE ESPACIAL</div>
+        <div class="flex-between">
+          <div>
+            <h2 class="display-title">Dispersão Geográfica da Poluição</h2>
+            <p class="section-sub">Camada de dados CartoDB Dark Matter sem necessidade de chaves proprietárias. Cada ponto representa o centroide do bairro com raio ajustado pelo índice IQA.</p>
+          </div>
+          <div class="segment-filter">
+            <button class="seg-btn active" id="map-btn-all" onclick="app.filterMapMarkers('all')">Todos (63)</button>
+            <button class="seg-btn" id="map-btn-criticos" onclick="app.filterMapMarkers('criticos')">Críticos / Ruim</button>
+            <button class="seg-btn" id="map-btn-otimos" onclick="app.filterMapMarkers('otimos')">Boa Qualidade</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-frame">
+        <div class="map-status-bar">
+          <div class="scale-legend">
+            <span class="scale-point" style="background:#06d6a0;"></span> Excelente
+            <span class="scale-point" style="background:#2dc653;"></span> Ótima
+            <span class="scale-point" style="background:#57cc99;"></span> Boa
+            <span class="scale-point" style="background:#ffd166;"></span> Regular
+            <span class="scale-point" style="background:#ef476f;"></span> Ruim
+            <span class="scale-point" style="background:#9b2226;"></span> Péssima
+          </div>
+          <div class="map-helper">Pressione sobre qualquer bairro para calcular a absorção de biomassa</div>
+        </div>
+        <div id="manaus-map" class="carto-map"></div>
+      </div>
+    </section>
+
+    <!-- VIEW: TERRITORIOS (LISTA DE BAIRROS) -->
+    <section id="view-territorios" class="view-panel">
+      <div class="section-title-lockup">
+        <div class="section-kicker">CADASTRO TERRITORIAL</div>
+        <div class="flex-between">
+          <div>
+            <h2 class="display-title">Diagnóstico Individual por Bairro</h2>
+            <p class="section-sub">Dados quantitativos de particulados finos (PM2.5, PM10, gases) e cobertura de copa.</p>
+          </div>
+          <div class="search-capsule">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="search-svg">
+              <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="#6B8178" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 14L10.5 10.5" stroke="#6B8178" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input type="text" id="search-input" placeholder="Buscar bairro ou zona...">
+          </div>
+        </div>
+      </div>
+
+      <div id="bairro-filters" class="filters-container"></div>
+      <div id="bairros-grid" class="bairros-editorial-grid"></div>
+    </section>
+
+    <!-- VIEW: SILVICULTURA (REFLORESTAMENTO) -->
+    <section id="view-silvicultura" class="view-panel">
+      <div class="section-title-lockup">
+        <div class="section-kicker">ENGENHARIA ECOLÓGICA</div>
+        <h2 class="display-title">Plano Diretor de Arborização Corretiva</h2>
+        <p class="section-sub">Equação estequiométrica de absorção baseada no volume de copa de árvores adultas nativas (22 kg CO₂/ano/árvore) para estabilizar o IQA em nível Excelente.</p>
+      </div>
+
+      <div id="trees-summary" class="summary-cards-row"></div>
+
+      <div class="section-title-lockup" style="margin-top: 4.5rem;">
+        <div class="section-kicker">ORDEM DE PRIORIDADE</div>
+        <h2 class="display-title">Ranking de Demanda Silvicultural</h2>
+        <p class="section-sub">Bairros que exigem plantios emergenciais para amenizar microclimas e dispersar poluentes.</p>
+      </div>
+      <div id="critical-ranking" class="table-wrap"></div>
+
+      <div class="section-title-lockup" style="margin-top: 4.5rem;">
+        <div class="section-kicker">SELEÇÃO TAXONÔMICA</div>
+        <h2 class="display-title">Espécies Nativas da Bacia Amazônica</h2>
+        <p class="section-sub">Árvores com alta retenção foliar de fuligem e taxas superiores de retenção de água no solo.</p>
+      </div>
+      <div id="especies-section"></div>
+    </section>
+
+  </main>
+
+  <!-- Editorial Detail Modal -->
+  <div id="modal-overlay" class="modal-backdrop">
+    <div class="editorial-modal">
+      <div class="modal-top">
+        <div class="modal-kicker">CADASTRO GEOAMBIENTAL</div>
+        <div class="modal-title-row">
+          <h3 id="modal-title" class="modal-heading">Bairro</h3>
+          <button class="modal-exit" onclick="app.closeModal()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Editorial Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col-main">
+        <div class="footer-mark">Amazon Green</div>
+        <div class="footer-tagline">Sistema de vigilância microclimática, regeneração vegetal urbana e análise de ar para Manaus, Amazonas.</div>
+      </div>
+      <div class="footer-col-meta">
+        <span class="meta-item">Dados abertos Open-Meteo</span>
+        <span class="meta-item">Cartografia CartoDB Dark Matter</span>
+        <span class="meta-item">Manaus · Brasil</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
